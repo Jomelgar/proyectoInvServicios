@@ -1,27 +1,28 @@
-import { useNavigate } from 'react-router-dom';
-import{useState} from 'react';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Modal, Button, Input, Form } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
-import { sendVerificationCode } from '../utils/email';
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
+import { sendVerificationCode } from "../utils/email";
 
-function LoginUI() {
-  const showModal = false;
+export default function LoginUI({ setUserEmail }) {
   const navigate = useNavigate();
-  const [verification,setVerification] = useState(false);
-  const [code,setCode] = useState(Math.random().toString(36).substring(2, 8).toUpperCase());
+  const [verification, setVerification] = useState(false);
+  const [code, setCode] = useState(
+    Math.random().toString(36).substring(2, 8).toUpperCase()
+  );
+  const [verificationCode, setVerificationCode] = useState("");
 
-  const onFinish = async(values) => {
-    if(verification === false)
-    {
+  const onFinish = async (values) => {
+    if (!verification) {
       sendVerificationCode(values.email, code);
       setVerification(true);
-    }else
-    {
-      if(code === values.code)
-      {
-        Cookies.set('user_email',values.email, {expires: 7});
-        navigate('/');
+    } else {
+      if (code === verificationCode.toUpperCase()) {
+        // Guardar cookie y actualizar estado
+        Cookies.set("user_email", values.email, { path: "/", expires: 7 });
+        setUserEmail(values.email);
+        navigate("/");
       }
     }
   };
@@ -33,14 +34,10 @@ function LoginUI() {
     >
       {/* Modal de error */}
       <Modal
-        open={showModal}
+        open={false} // puedes controlar si mostrar error
         onCancel={() => {}}
         footer={[
-          <Button
-            key="close"
-            type="primary"
-            className="bg-blue-500 hover:bg-blue-400"
-          >
+          <Button key="close" type="primary" className="bg-blue-500 hover:bg-blue-400">
             Cerrar
           </Button>,
         ]}
@@ -58,7 +55,7 @@ function LoginUI() {
 
       {/* Formulario */}
       <div className="bg-white w-full max-w-lg rounded-xl shadow-xl p-8 flex flex-col gap-3">
-        <img alt='UNITEC' src="/logo.png" className="w-48 h-auto mx-auto"/>
+        <img alt="UNITEC" src="/logo.png" className="w-48 h-auto mx-auto" />
         <h1 className="text-blue-500 text-3xl font-extrabold text-center">
           Sistema de Inventario
         </h1>
@@ -73,11 +70,7 @@ function LoginUI() {
           requiredMark={false}
         >
           <Form.Item
-            label={
-                <span className="text-5md font-bold">
-                Correo electrónico
-                </span>
-            }
+            label={<span className="text-5md font-bold">Correo electrónico</span>}
             name="email"
             rules={[
               { required: true, message: "Por favor ingrese su correo" },
@@ -87,32 +80,30 @@ function LoginUI() {
               },
             ]}
           >
-            <Input disabled={verification}placeholder="Ejemplo@unitec.edu.hn" />
+            <Input disabled={verification} placeholder="Ejemplo@unitec.edu.hn" />
           </Form.Item>
 
-            {verification && (
-                <Form.Item
-                    label={
-                        <span className="text-5md font-bold">
-                        Código de verificación
-                        </span>
-                    }
-                    name="code"
-                    rules={[
-                    { required: true, message: "Por favor ingrese su correo" },
-                    
-                    ]}
-                >
-                    <input
-                            type="text"
-                            maxLength={6}
-                            value={verification}
-                            placeholder="Código de verificación"
-                            className="border border-gray-300 bg-white rounded-md p-2 mb-2  w-full text-center tracking-widest text-sm"
-                    />
-                </Form.Item>
-            )}
-        
+          {verification && (
+            <Form.Item
+              label={<span className="text-5md font-bold">Código de verificación</span>}
+              name="code"
+              rules={[{ required: true, message: "Por favor ingrese el código" }]}
+            >
+              <Input
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value.toUpperCase())}
+                maxLength={6}
+                placeholder="CODIGO"
+                style={{
+                  textTransform: "uppercase",
+                  textAlign: "center",
+                  letterSpacing: "0.3em",
+                }}
+                className="border border-gray-300 bg-white rounded-md p-2 mb-2 w-full text-sm"
+              />
+            </Form.Item>
+          )}
+
           <Form.Item>
             <Button
               type="primary"
@@ -120,7 +111,7 @@ function LoginUI() {
               className="mt-5 bg-blue-700 hover:scale-105 active:bg-blue-500 hover:bg-blue-500"
               block
             >
-              {!verification? 'Verificar':'Ingresar'}
+              {!verification ? "Verificar" : "Ingresar"}
             </Button>
           </Form.Item>
         </Form>
@@ -128,5 +119,3 @@ function LoginUI() {
     </div>
   );
 }
-
-export default LoginUI;

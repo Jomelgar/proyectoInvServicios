@@ -1,21 +1,28 @@
 import { Layout } from "antd";
-import { MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons";
+import { MenuOutlined, MenuUnfoldOutlined, MenuFoldOutlined } from "@ant-design/icons";
 
 const { Header: AntHeader } = Layout;
 
-function Header({ collapsed, setCollapsed }) {
+function Header({ collapsed, setCollapsed, isMobile, setDrawerVisible }) {
   return (
     <AntHeader className="bg-white flex items-center justify-between px-4 mb-2 border-b border-gray-500">
       {/* Botón + título */}
       <div className="flex items-center">
-        {collapsed ? (
+        {isMobile ? (
+          // Móvil: abre Drawer
+          <MenuOutlined
+            onClick={() => setDrawerVisible(true)}
+            className="text-xl cursor-pointer"
+          />
+        ) : collapsed ? (
+          // Escritorio: colapsa/expande Sider
           <MenuUnfoldOutlined
             onClick={() => setCollapsed(false)}
             className="text-xl cursor-pointer"
           />
         ) : (
           <MenuFoldOutlined
-            onClick={() => setCollapsed(true)}
+            onClick={() => {setCollapsed(true); setDrawerVisible(false)}}
             className="text-xl cursor-pointer"
           />
         )}

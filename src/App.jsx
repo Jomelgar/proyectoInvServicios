@@ -1,11 +1,15 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Home from "./pages/home";
-import Login from "./pages/Login";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 
+import LoginUI from "./pages/login";
+import Home from "./pages/home";
+import DashboardAdmin from "./components/dashboardAdmin";
+import DashboardNormal from "./components/dashboardNormal";
+
 function Dashboard() {
-  return <h1>Bienvenido al sistema</h1>;
+  const isAdmin = true;
+  return isAdmin ? <DashboardAdmin /> : <DashboardNormal />;
 }
 
 function Formularios() {
@@ -13,20 +17,29 @@ function Formularios() {
 }
 
 function App() {
-  const [email,setEmail] = useState(Cookies.get('user_email'));
+  const [userEmail, setUserEmail] = useState(Cookies.get("user_email"));
 
-  useEffect(()=>{
-    setEmail(Cookies.get('user_email'));
-  },[])
+  // Sincroniza estado con cookie
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const cookieEmail = Cookies.get("user_email");
+      if (cookieEmail !== userEmail) setUserEmail(cookieEmail);
+    }, 200);
+    return () => clearInterval(interval);
+  }, [userEmail]);
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={email ? <Home /> : <Navigate to="/login" />}>
-          {/* Rutas hijas dentro de Home */}
+        <Route path="/login" element={<LoginUI setUserEmail={setUserEmail} />} />
+        <Route
+          path="/"
+          element={userEmail ? <Home /> : <Navigate to="/login" />}
+        >
           <Route index element={<Dashboard />} />
           <Route path="formularios" element={<Formularios />} />
+          <Route path="perfil" element={<></>} />
+          <Route path='calendario' element={<></>}/>
         </Route>
       </Routes>
     </BrowserRouter>
