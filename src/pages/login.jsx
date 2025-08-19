@@ -4,6 +4,7 @@ import { Modal, Button, Input, Form } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import Cookies from "js-cookie";
 import { sendVerificationCode } from "../utils/email";
+import supabaseClient from "../utils/supabase";
 
 export default function LoginUI({ setUserEmail }) {
   const navigate = useNavigate();
@@ -19,7 +20,11 @@ export default function LoginUI({ setUserEmail }) {
       setVerification(true);
     } else {
       if (code === verificationCode.toUpperCase()) {
-        // Guardar cookie y actualizar estado
+          const {error} = await supabaseClient.from('users').insert([{email:values.email}]);
+          if (error) {
+            const {data}= await supabaseClient.from('users').select().eq('email', values.email).single();
+            if(!data) {return;}
+          }         
         Cookies.set("user_email", values.email, { path: "/", expires: 7 });
         setUserEmail(values.email);
         navigate("/");

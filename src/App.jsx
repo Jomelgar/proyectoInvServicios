@@ -6,15 +6,44 @@ import LoginUI from "./pages/login";
 import Home from "./pages/home";
 import DashboardAdmin from "./components/dashboardAdmin";
 import DashboardNormal from "./components/dashboardNormal";
-
-function Dashboard() {
-  const isAdmin = true;
-  return isAdmin ? <DashboardAdmin /> : <DashboardNormal />;
-}
+import Perfil from "./components/Profile";
+import Calendario from "./components/Calendar";
+import supabaseClient from "./utils/supabase";
 
 function Formularios() {
   return <h1>Página de Formularios</h1>;
 }
+
+function Dashboard() {
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const { data, error } = await supabaseClient
+          .from("users")
+          .select("role")
+          .eq("email", Cookies.get("user_email"))
+          .single();
+
+        if (error) {
+          console.error("Error al obtener rol:", error.message);
+        } else {
+          setRole(data?.role);
+        }
+      } catch (err) {
+        console.error("Error inesperado:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRole();
+  }, []);
+  if (loading) return <p>Cargando...</p>;
+  return role === "USUARIO" ? <DashboardNormal /> : <DashboardAdmin />;
+}
+
 
 function App() {
   const [userEmail, setUserEmail] = useState(Cookies.get("user_email"));
@@ -36,10 +65,10 @@ function App() {
           path="/"
           element={userEmail ? <Home /> : <Navigate to="/login" />}
         >
-          <Route index element={<Dashboard />} />
+          <Route index element={Dashboard()} />
           <Route path="formularios" element={<Formularios />} />
-          <Route path="perfil" element={<></>} />
-          <Route path='calendario' element={<></>}/>
+          <Route path="perfil" element={<Perfil/>} />
+          <Route path='calendario' element={<Calendario/>}/>
         </Route>
       </Routes>
     </BrowserRouter>
