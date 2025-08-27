@@ -6,13 +6,10 @@ import LoginUI from "./pages/login";
 import Home from "./pages/home";
 import DashboardAdmin from "./components/dashboardAdmin";
 import DashboardNormal from "./components/dashboardNormal";
-import Perfil from "./components/Profile";
-import Calendario from "./components/Calendar";
+import Perfil from "./pages/Profile";
+import MisForms from "./components/MyForms";
+import Calendario from "./pages/Calendar";
 import supabaseClient from "./utils/supabase";
-
-function Formularios() {
-  return <h1>Página de Formularios</h1>;
-}
 
 function Dashboard() {
   const [role, setRole] = useState(null);
@@ -66,9 +63,9 @@ function App() {
           element={userEmail ? <Home /> : <Navigate to="/login" />}
         >
           <Route index element={Dashboard()} />
-          <Route path="formularios" element={<Formularios />} />
           <Route path="perfil" element={<Perfil/>} />
           <Route path='calendario' element={<Calendario/>}/>
+          <Route path='formularios' element={<MisForms/>}/>
         </Route>
       </Routes>
     </BrowserRouter>

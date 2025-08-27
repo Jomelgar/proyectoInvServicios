@@ -119,7 +119,7 @@ function Profile() {
                 rules={[{ required: true, message: "Rol requerido" }]}
               >
                 <Select
-                  disabled={Boolean(user?.role) && !isEditing}
+                  disabled={ user.role !== 'USUARIO' || !isEditing}
                   className="rounded-xl text-xl"
                   placeholder="Rol"
                   style={{ width: "100%" }}
