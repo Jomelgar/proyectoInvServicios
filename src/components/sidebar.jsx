@@ -126,7 +126,7 @@ function Sidebar({ collapsed, setCollapsed, drawerVisible, setDrawerVisible, isM
         <Menu
           theme="dark"
           mode="inline"
-          className="!bg-transparent"
+          className="!font-[Poppins] !bg-transparent"
           selectedKeys={[selectedKey]}
           items={menuItems}
         />

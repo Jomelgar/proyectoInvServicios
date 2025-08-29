@@ -26,7 +26,7 @@ function Header({ collapsed, setCollapsed, isMobile, setDrawerVisible }) {
             className="text-xl cursor-pointer"
           />
         )}
-        <h2 className="ml-4 text-lg font-semibold">Panel de Control</h2>
+        <h2 className="font-[Poppins] ml-4 text-lg font-semibold">Panel de Control</h2>
       </div>
 
       {/* Logo a la derecha */}

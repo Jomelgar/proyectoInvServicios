@@ -1,44 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Input, Form } from "antd";
+import { Modal, Button, Input, Form } from "antd";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import Cookies from "js-cookie";
+import { sendVerificationCode } from "../utils/email";
 import supabaseClient from "../utils/supabase";
-import bcrypt from "../utils/bcrypt";
 
 export default function LoginUI({ setUserEmail }) {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [verification, setVerification] = useState(false);
+  const [code] = useState(Math.random().toString(36).substring(2, 8).toUpperCase());
+  const [verificationCode, setVerificationCode] = useState("");
 
   const onFinish = async (values) => {
-    setLoading(true);
-    try {
-      // Aquí verificamos si el usuario existe y la contraseña es correcta
-      const { data: user, error } = await supabaseClient
-        .from("users")
-        .select("*")
-        .eq("email", values.email)
-        .single();
-      if (error || !user) {
-        alert("Usuario no registrado");
-        setLoading(false);
-        return;
+    if (!verification) {
+      sendVerificationCode(values.email, code);
+      setVerification(true);
+    } else {
+      if (code === verificationCode.toUpperCase()) {
+        Cookies.set("register_email", values.email, { path: "/", expires: 1 });
+        setUserEmail(values.email);
+        navigate("/create-account");
       }
-
-      if (!bcrypt.comparePassword(values.password,user.password)) {
-        alert("Contraseña incorrecta");
-        setLoading(false);
-        return;
-      }
-
-      // Guardar cookie y navegar
-      Cookies.set("user_email", values.email, { path: "/", expires: 7 });
-      setUserEmail(values.email);
-      navigate("/");
-    } catch (err) {
-      console.error(err);
-      alert("Error en el inicio de sesión");
     }
-    setLoading(false);
   };
 
   return (
@@ -84,46 +68,53 @@ export default function LoginUI({ setUserEmail }) {
       <div className="relative bg-white w-full max-w-lg rounded-xl shadow-xl p-8 flex flex-col gap-3 z-10">
         <img alt="UNITEC" src="/logo.png" className="w-48 h-auto mx-auto" />
         <h1 className="text-blue-500 font-[Poppins] text-3xl font-extrabold text-center">
-          INICIO DE SESIÓN
+          REGISTRARSE
         </h1>
-        <p className="text-center font-[Poppins] text-gray-700 font-medium">
-          Ingrese su correo y contraseña
+        <p className="text-center font-[Poppins] font-extrabold text-gray-700 font-medium">
+          INGRESE SU CORREO ASOCIADO
         </p>
 
-        <Form className="flex-col flex" name="loginForm" layout="vertical" onFinish={onFinish} requiredMark={false}>
+        <Form name="loginForm" layout="vertical" onFinish={onFinish} requiredMark={false}>
           <Form.Item
             label={<span className="text-5md font-bold font-[Poppins]">Correo electrónico</span>}
             name="email"
             rules={[
               { required: true, message: "Por favor ingrese su correo" },
-              { pattern: /^[\w-.]+@unitec\.edu$/, message: "El correo debe terminar con @unitec.edu" },
+              { pattern: /^[\w-.]+@unitec\.edu$/, message: "El correo debe terminar con @unitec.edu.hn" },
             ]}
           >
-            <Input className="font-[Poppins]" placeholder="Ejemplo@unitec.edu" />
+            <Input className="font-[Poppins]" disabled={verification} placeholder="Ejemplo@unitec.edu.hn" />
           </Form.Item>
 
-          <Form.Item
-            label={<span className="text-5md font-bold font-[Poppins]">Contraseña</span>}
-            name="password"
-            rules={[{ required: true, message: "Por favor ingrese su contraseña" }]}
-          >
-            <Input.Password
-              className="font-[Poppins]"
-              placeholder="********"
-              autoComplete="current-password"
-            />
-          </Form.Item>
+          {verification && (
+            <Form.Item
+              label={<span className="text-5md font-bold">Código de verificación</span>}
+              name="code"
+              rules={[{ required: true, message: "Por favor ingrese el código" }]}
+            >
+              <Input
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value.toUpperCase())}
+                maxLength={6}
+                placeholder="CODIGO"
+                style={{
+                  textTransform: "uppercase",
+                  textAlign: "center",
+                  letterSpacing: "0.3em",
+                }}
+                className="border border-gray-300 bg-white rounded-md p-2 mb-2 w-full text-sm"
+              />
+            </Form.Item>
+          )}
 
-            <a className="text-center underline" href="/signup">¿No tienes una cuenta? Registrate</a>
           <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
-              loading={loading}
               className="mt-5 bg-blue-700 font-[Poppins] font-bold hover:scale-105 active:bg-blue-500 hover:bg-blue-500"
               block
             >
-              Ingresar
+              {!verification ? "Verificar" : "Ingresar"}
             </Button>
           </Form.Item>
         </Form>

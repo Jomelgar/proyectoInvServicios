@@ -12,7 +12,7 @@ import Cookies from "js-cookie";
 const { Option } = Select;
 
 const BlueLabel = ({ children }) => (
-  <span className="text-blue-700 font-bold">{children}</span>
+  <span className="font-[Poppins] text-blue-700 font-bold">{children}</span>
 );
 
 function Profile() {
@@ -91,7 +91,7 @@ function Profile() {
 
   return (
     <div className="p-6 min-h-screen flex flex-col items-center">
-      <h1 className="text-4xl font-bold mb-6 text-center text-blue-900 border-b w-full">
+      <h1 className="text-4xl font-[Poppins] font-bold mb-6 text-center text-blue-900 border-b w-full">
         Mi Perfil
       </h1>
       <Card bordered={false} className="w-full rounded-2xl p-6">
@@ -106,7 +106,7 @@ function Profile() {
               prefix={<MailOutlined />}
               placeholder="ejemplo@email.com"
               disabled
-              className="rounded-xl"
+              className="font-[Poppins] rounded-xl"
             />
           </Form.Item>
 
@@ -119,8 +119,8 @@ function Profile() {
                 rules={[{ required: true, message: "Rol requerido" }]}
               >
                 <Select
-                  disabled={ user.role !== 'USUARIO' || !isEditing}
-                  className="rounded-xl text-xl"
+                  disabled={ user.role === 'USUARIO' || !isEditing}
+                  className="font-[Poppins] rounded-xl text-xl"
                   placeholder="Rol"
                   style={{ width: "100%" }}
                 >
@@ -140,10 +140,10 @@ function Profile() {
               >
                 <Select
                   disabled={
-                    (user?.id_basement && user?.role !== "CREADOR") || !isEditing
+                    (user.role !== "CREADOR") || !isEditing
                   }
                   placeholder="Lugar"
-                  className="rounded-xl text-xl"
+                  className="font-[Poppins] rounded-xl text-xl"
                 >
                   {basements.map((basement) => (
                     <Option key={basement.id} value={basement.id}>
@@ -167,7 +167,7 @@ function Profile() {
                   prefix={<UserOutlined className="text-blue-900" />}
                   placeholder="Ej. Juan"
                   disabled={!isEditing}
-                  className="rounded-xl"
+                  className="font-[Poppins] rounded-xl"
                 />
               </Form.Item>
             </Col>
@@ -181,7 +181,7 @@ function Profile() {
                   prefix={<UserOutlined className="text-blue-900" />}
                   placeholder="Ej. Carlos"
                   disabled={!isEditing}
-                  className="rounded-xl"
+                  className="font-[Poppins] rounded-xl"
                 />
               </Form.Item>
             </Col>
@@ -198,7 +198,7 @@ function Profile() {
                   prefix={<IdcardOutlined className="text-blue-900" />}
                   placeholder="Ej. Pérez"
                   disabled={!isEditing}
-                  className="rounded-xl"
+                  className="font-[Poppins] rounded-xl"
                 />
               </Form.Item>
             </Col>
@@ -212,7 +212,7 @@ function Profile() {
                   prefix={<IdcardOutlined className="text-blue-900" />}
                   placeholder="Ej. López"
                   disabled={!isEditing}
-                  className="rounded-xl"
+                  className="font-[Poppins] rounded-xl"
                 />
               </Form.Item>
             </Col>
@@ -225,13 +225,13 @@ function Profile() {
                 <Button
                   type="primary"
                   htmlType="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all duration-200 px-6 py-2"
+                  className="font-[Poppins] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all duration-200 px-6 py-2"
                 >
                   Guardar
                 </Button>
                 <Button
                   onClick={() => setIsEditing(false)}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl shadow-sm transition-all duration-200 px-6 py-2"
+                  className="font-[Poppins] bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl shadow-sm transition-all duration-200 px-6 py-2"
                 >
                   Cancelar
                 </Button>
@@ -241,7 +241,7 @@ function Profile() {
                 <Button
                   type="  "
                   onClick={() => setIsEditing(true)}
-                  className=" w-[80%] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all duration-200 px-6 py-2"
+                  className="font-[Poppins] w-[80%] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all duration-200 px-6 py-2"
                 >
                   <EditOutlined />
                   Editar
