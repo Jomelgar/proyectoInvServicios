@@ -70,12 +70,12 @@ function MyForms() {
             : "flex flex-col justify-between items-center"
         } px-5 py-3`}
       >
-        <h1 className="font-[Poppins] m-5 font-bold text-2xl md:text-4xl text-blue-900">
-          Mis Formularios
+        <h1 className="font-[Poppins] m-5 font-bold text-4xl md:text-4xl text-blue-900">
+          Mis Casos
         </h1>
         <Button
           icon={<PlusCircleOutlined />}
-          className="font-[Poppins] m-2 h-full bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 transition-transform rounded-xl shadow-md text-sm md:text-lg"
+          className="font-[Poppins] m-2 h-full bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 transition-transform rounded-xl shadow-md text-xl md:text-lg"
         >
           Solicitar
         </Button>

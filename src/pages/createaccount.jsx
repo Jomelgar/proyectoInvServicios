@@ -1,61 +1,87 @@
 import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Input, Form, notification, Select } from "antd"; // 👈 importamos notification
+import { Button, Input, Form, notification, Select, Row, Col } from "antd"; 
 import supabaseClient from "../utils/supabase";
-import bcrypt from "../utils/bcrypt";
 import Cookies from "js-cookie";
 
-export default function RegisterUI({userEmail}) {
+export default function RegisterUI({userEmail,setUserEmail}) {
   const navigate = useNavigate();
   const [basements,setBasements] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 👇 Hook de notificación
   const [api, contextHolder] = notification.useNotification();
-    const fetchBasement = async () => {
-    const { data, error } = await supabaseClient.from("basement").select('*');
+
+  const fetchBasement = async () => {
+    const { data, error } = await supabaseClient.from("basement").select('*').eq('state',true);
     if (!error) setBasements(data);
   };
 
   useEffect(()=>{
-    const fetchData = async()=>{
-      await fetchBasement();
-    }
-    fetchData();
+    fetchBasement();
   },[]);
 
   const onFinish = async (values) => {
     setLoading(true);
-    const hashPassword = bcrypt.hashPassword(values.password);
 
-    const {error} = await supabaseClient.from('users').insert([{
-        first_name: values.firstName,
-        second_name: values.secondName,
-        email: values.email,
-        last_name: values.lastName1,
-        last_second_name: values.lastName2,
-        password: hashPassword,
-        id_basement: values.basement,
-    }]);
+    const { data, error: signUpError } = await supabaseClient.auth.signUp({
+      email: values.email,
+      password: values.password,
+    });
 
-    if(!error){
-      Cookies.remove("register_email");
-      navigate("/");
-    } else {
+    if (signUpError) {
       api.error({
-        message: "Error al crear la cuenta",
-        description: "No se pudo crear su cuenta, intente de nuevo o registre otro correo.",
+        message: "Error al registrar",
+        description: signUpError.message,
         placement: "top",
-        duration: 5, // 👈 se cierra solo en 5s (puedes poner null si quieres que sea manual)
+        duration: 5,
       });
+      setLoading(false);
+      return;
+    }
+
+    const userUuid = data.user?.id;
+
+    if (userUuid) {
+      const { data, error } = await supabaseClient.from("users").insert([
+        {
+          uuid: userUuid,
+          first_name: values.firstName,
+          second_name: values.secondName,
+          email: values.email,
+          last_name: values.lastName1,
+          last_second_name: values.lastName2,
+          id_basement: values.basement,
+        },
+      ]).select().single();
+
+      const {error: errorRel} = await supabaseClient.from("user_roles").insert([{
+        id_user: data.id,
+        uuid: userUuid,
+        role: "USUARIO",
+      }])
+
+      if (!error && !errorRel) {
+        Cookies.remove("register_email");
+        setUserEmail(userUuid);
+        Cookies.set("user_email",userUuid);
+        navigate("/");
+      } else {
+        api.error({
+          message: "Error al crear la cuenta",
+          description: "No se pudo crear su cuenta, intente de nuevo o registre otro correo.",
+          placement: "top",
+          duration: 5,
+        });
+        
+      }
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center overflow-hidden bg-blue-400">
-      {/* 👇 Muy importante: sin esto no sale nada */}
+    <div className="relative min-h-screen w-screen flex items-center justify-center overflow-y-auto bg-blue-400">
+      {contextHolder}
 
       {/* Fondo animado */}
       <div className="absolute inset-0 overflow-hidden">
@@ -81,22 +107,19 @@ export default function RegisterUI({userEmail}) {
           50% { transform: rotate(-25deg) translateX(100%); }
           100% { transform: rotate(-25deg) translateX(-100%); }
         }
-
         @keyframes gradientShift {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
-
         .animate-gradientShift {
           background-size: 200% 200%;
           animation: gradientShift 15s ease infinite;
         }
       `}</style>
 
-      {contextHolder}
-      {/* Formulario */}
-      <div className="relative bg-white w-full max-w-lg rounded-xl shadow-xl p-8 flex flex-col gap-3 z-10">
+      {/* Card formulario con scroll */}
+      <div className="relative bg-white w-full max-w-3xl rounded-xl shadow-xl p-8 flex flex-col gap-3 z-10 my-8">
         <img alt="UNITEC" src="/logo.png" className="w-48 h-auto mx-auto" />
         <h1 className="text-blue-500 font-[Poppins] text-3xl font-extrabold text-center">
           CREAR CUENTA
@@ -105,100 +128,96 @@ export default function RegisterUI({userEmail}) {
           Complete sus datos para registrarse
         </p>
 
-        <Form name="registerForm" layout="vertical" onFinish={onFinish} requiredMark={false} initialValues={{email: userEmail}}>
-            <Form.Item
-                label={<span className="text-5md font-bold font-[Poppins]">Correo electrónico</span>}
-                name="email"
-            >
-                <Input value={userEmail} disabled className="font-[Poppins] !text-black bg-gray-100" />
-            </Form.Item>
-            <Form.Item
-              label={<span className="text-5md font-bold font-[Poppins]">Sede</span>}
-              name="basement"
-              rules={[{ required: true, message: "Por favor ingresa un lugar" },]}
-            >
-              <Select
-                placeholder="Sede"
-                className="rounded-xl text-xl font-[Poppins]"
+        <Form 
+          name="registerForm" 
+          layout="vertical" 
+          onFinish={onFinish} 
+          requiredMark={false} 
+          initialValues={{email: userEmail}}
+        >
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item label="Correo electrónico" name="email">
+                <Input value={userEmail} disabled className="bg-gray-100 !text-black font-[Poppins]" />
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item 
+                label="Sede" 
+                name="basement" 
+                rules={[{ required: true, message: "Por favor selecciona una sede" }]}
               >
-                {basements.map((p)=>(
-                  <Select.Option key={p.id} value={p.id}>
+                <Select placeholder="Sede" className="font-[Poppins]">
+                  {basements.map((p)=>(
+                    <Select.Option key={p.id} value={p.id}>
                       {p.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Form.Item
-              label={<span className="text-5md font-bold font-[Poppins]">Primer nombre</span>}
-              name="firstName"
-              rules={[{ required: true, message: "Ingrese su primer nombre" }]}
-            >
-              <Input className="font-[Poppins]" placeholder="Ej. Juan" />
-            </Form.Item>
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item label="Primer nombre" name="firstName" rules={[{ required: true, message: "Ingrese su primer nombre" }]}>
+                <Input placeholder="Ej. Juan" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item label="Segundo nombre" name="secondName">
+                <Input placeholder="Ej. Carlos" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item label="Primer apellido" name="lastName1" rules={[{ required: true, message: "Ingrese su primer apellido" }]}>
+                <Input placeholder="Ej. Pérez" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item label="Segundo apellido" name="lastName2">
+                <Input placeholder="Ej. Gómez" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item 
+                label="Contraseña" 
+                name="password"
+                rules={[
+                  { required: true, message: "Por favor ingresa tu contraseña" },
+                  { min: 6, message: "Debe tener al menos 6 caracteres" }
+                ]}
+                hasFeedback
+              >
+                <Input.Password placeholder="Ingresa tu contraseña" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item 
+                label="Confirmar contraseña" 
+                name="confirmPassword" 
+                dependencies={["password"]}
+                hasFeedback
+                rules={[
+                  { required: true, message: "Confirma tu contraseña" },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue("password") === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(new Error("Las contraseñas no coinciden"));
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password placeholder="Confirma tu contraseña" />
+              </Form.Item>
+            </Col>
+          </Row>
 
-            <Form.Item
-              label={<span className="text-5md font-bold font-[Poppins]">Segundo nombre</span>}
-              name="secondName"
-            >
-              <Input className="font-[Poppins]" placeholder="Ej. Carlos" />
-            </Form.Item>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Form.Item
-              label={<span className="text-5md font-bold font-[Poppins]">Primer apellido</span>}
-              name="lastName1"
-              rules={[{ required: true, message: "Ingrese su primer apellido" }]}
-            >
-              <Input className="font-[Poppins]" placeholder="Ej. Pérez" />
-            </Form.Item>
-
-            <Form.Item
-              label={<span className="text-5md font-bold font-[Poppins]">Segundo apellido</span>}
-              name="lastName2"
-            >
-              <Input className="font-[Poppins]" placeholder="Ej. Gómez" />
-            </Form.Item>
-          </div>
-
-          <Form.Item
-            label={<span className="text-5md font-bold font-[Poppins]">Contraseña</span>}
-            name="password"
-            rules={[
-                { required: true, message: "Por favor ingresa tu contraseña" },
-                { min: 6, message: "La contraseña debe tener al menos 6 caracteres" }
-            ]}
-            hasFeedback
-          >
-            <Input.Password className="font-[Poppins]" placeholder="Ingresa tu contraseña" />
-            </Form.Item>
-
-            <Form.Item
-            label={<span className="text-5md font-bold font-[Poppins]">Confirmar contraseña</span>}
-            name="confirmPassword"
-            dependencies={["password"]}
-            hasFeedback
-            rules={[
-                { required: true, message: "Por favor confirma tu contraseña" },
-                ({ getFieldValue }) => ({
-                validator(_, value) {
-                    if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                    }
-                    return Promise.reject(new Error("Las contraseñas no coinciden"));
-                },
-                }),
-            ]}
-            >
-            <Input.Password className="font-[Poppins]" placeholder="Confirma tu contraseña" />
-            </Form.Item>
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              className="mt-5 bg-blue-700 font-[Poppins] font-bold hover:scale-105 active:bg-blue-500 hover:bg-blue-500"
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              loading={loading} 
+              className="mt-4 bg-blue-700 font-[Poppins] font-bold hover:scale-105 active:bg-blue-500 hover:bg-blue-500" 
               block
             >
               Crear cuenta

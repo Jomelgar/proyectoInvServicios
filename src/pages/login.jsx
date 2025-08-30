@@ -4,6 +4,7 @@ import { Button, Input, Form } from "antd";
 import Cookies from "js-cookie";
 import supabaseClient from "../utils/supabase";
 import bcrypt from "../utils/bcrypt";
+import supabase from "../utils/supabase";
 
 export default function LoginUI({ setUserEmail }) {
   const navigate = useNavigate();
@@ -13,25 +14,18 @@ export default function LoginUI({ setUserEmail }) {
     setLoading(true);
     try {
       // Aquí verificamos si el usuario existe y la contraseña es correcta
-      const { data: user, error } = await supabaseClient
-        .from("users")
-        .select("*")
-        .eq("email", values.email)
-        .single();
+      const { data: user, error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password
+      });
+      const userUuid = user.user?.id;
       if (error || !user) {
-        alert("Usuario no registrado");
+        
         setLoading(false);
         return;
       }
-
-      if (!bcrypt.comparePassword(values.password,user.password)) {
-        alert("Contraseña incorrecta");
-        setLoading(false);
-        return;
-      }
-
       // Guardar cookie y navegar
-      Cookies.set("user_email", values.email, { path: "/", expires: 7 });
+      Cookies.set("user_email", userUuid, { path: "/", expires: 7 });
       setUserEmail(values.email);
       navigate("/");
     } catch (err) {

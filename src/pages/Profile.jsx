@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Row, Col, Card, Form, Input, Select, Button, Spin } from "antd";
+import { Row, Col, Card, Form, Input, Select, Button, Spin, Modal, message } from "antd";
 import {
   UserOutlined,
   MailOutlined,
   IdcardOutlined,
   EditOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 import SupabaseClient from "../utils/supabase";
 import Cookies from "js-cookie";
@@ -21,13 +22,18 @@ function Profile() {
   const [roles, setRoles] = useState([]);
   const [basements, setBasements] = useState([]);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // ✅ loader
+  const [loading, setLoading] = useState(true);
+
+  // 🔑 Estado para modal de cambio de contraseña
+  const [isPasswordModalOpen, setPasswordModalOpen] = useState(false);
+  const [passwordForm] = Form.useForm();
 
   const fetchUser = async () => {
     const { data, error } = await SupabaseClient.from("users")
-      .select()
-      .eq("email", Cookies.get("user_email"))
+      .select('*')
+      .eq("uuid", Cookies.get("user_email"))
       .single();
+    console.log(error);
     if (error) return null;
     return data;
   };
@@ -66,7 +72,7 @@ function Profile() {
 
   const handleSave = async (values) => {
     setLoading(true);
-    await SupabaseClient.from("users")
+    const {data} = await SupabaseClient.from("users")
       .update({
         first_name: values.firstName,
         second_name: values.secondName,
@@ -76,9 +82,32 @@ function Profile() {
         role: values.role,
         id_basement: values.basement,
       })
-      .eq("email", values.email);
+      .eq("email", values.email).select().single();
+    const {error} = await SupabaseClient.from('user_roles').update({role: data.role}).eq('uuid',data.uuid);
+    
+    if (!error) {
+      window.location.reload();
+    }
     setIsEditing(false);
     setLoading(false);
+  };
+
+  // 🔑 Manejar cambio de contraseña
+  const handlePasswordChange = async (values) => {
+    if (values.newPassword !== values.confirmPassword) {
+      message.error("Las contraseñas no coinciden");
+      return;
+    }
+    const { error } = await SupabaseClient.auth.updateUser({
+      password: values.newPassword,
+    });
+    if (error) {
+      message.error("Error al cambiar contraseña");
+    } else {
+      message.success("Contraseña cambiada con éxito");
+      setPasswordModalOpen(false);
+      passwordForm.resetFields();
+    }
   };
 
   if (loading) {
@@ -106,7 +135,7 @@ function Profile() {
               prefix={<MailOutlined />}
               placeholder="ejemplo@email.com"
               disabled
-              className="font-[Poppins] rounded-xl"
+              className="!text-gray-500 font-[Poppins] rounded-xl"
             />
           </Form.Item>
 
@@ -119,8 +148,8 @@ function Profile() {
                 rules={[{ required: true, message: "Rol requerido" }]}
               >
                 <Select
-                  disabled={ user.role === 'USUARIO' || !isEditing}
-                  className="font-[Poppins] rounded-xl text-xl"
+                  disabled={user.role !== "CREADOR" || !isEditing}
+                  className="!text-black font-[Poppins] rounded-xl text-xl"
                   placeholder="Rol"
                   style={{ width: "100%" }}
                 >
@@ -139,11 +168,9 @@ function Profile() {
                 rules={[{ required: true, message: "Sede requerida" }]}
               >
                 <Select
-                  disabled={
-                    (user.role !== "CREADOR") || !isEditing
-                  }
+                  disabled={user.role !== "CREADOR" || !isEditing}
                   placeholder="Lugar"
-                  className="font-[Poppins] rounded-xl text-xl"
+                  className="!text-black font-[Poppins] rounded-xl text-xl"
                 >
                   {basements.map((basement) => (
                     <Option key={basement.id} value={basement.id}>
@@ -237,20 +264,54 @@ function Profile() {
                 </Button>
               </Col>
             ) : (
-              <div className="flex flex-col items-center w-full">
+              <div className="flex flex-col items-center w-full gap-3">
                 <Button
-                  type="  "
+                  type="primary"
                   onClick={() => setIsEditing(true)}
                   className="font-[Poppins] w-[80%] bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all duration-200 px-6 py-2"
                 >
-                  <EditOutlined />
-                  Editar
+                  <EditOutlined /> Editar
+                </Button>
+                <Button
+                  danger
+                  onClick={() => setPasswordModalOpen(true)}
+                  className="font-[Poppins] w-[80%] bg-red-500 hover:bg-red-600 text-red-500 font-semibold rounded-xl shadow-md transition-all duration-200 px-6 py-2"
+                >
+                  <LockOutlined /> Cambiar Contraseña
                 </Button>
               </div>
             )}
           </Form.Item>
         </Form>
       </Card>
+
+      {/* 🔑 Modal cambio de contraseña */}
+      <Modal
+        title="Cambiar Contraseña"
+        open={isPasswordModalOpen}
+        onCancel={() => setPasswordModalOpen(false)}
+        footer={null}
+      >
+        <Form layout="vertical" form={passwordForm} onFinish={handlePasswordChange}>
+          <Form.Item
+            label={<BlueLabel>Nueva Contraseña</BlueLabel>}
+            name="newPassword"
+            rules={[{ required: true, message: "Ingrese nueva contraseña" }]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="Nueva contraseña" />
+          </Form.Item>
+          <Form.Item
+            label={<BlueLabel>Confirmar Contraseña</BlueLabel>}
+            name="confirmPassword"
+            rules={[{ required: true, message: "Confirme su contraseña" }]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="Confirmar contraseña" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" block>
+            Guardar Contraseña
+          </Button>
+        </Form>
+      </Modal>
     </div>
   );
 }
