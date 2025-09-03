@@ -19,8 +19,8 @@ const CardEspacio = ({ espacios }) => {
           <div className="w-20 h-20 bg-blue-100 flex items-center justify-center rounded-full mb-4">
             {espacio.imagen ? (
               <img
-                src={espacio.imagen}
-                alt={espacio.nombre}
+                src={espacio.image}
+                alt={espacio.name}
                 className="w-full h-full object-cover rounded-full"
               />
             ) : (
@@ -29,9 +29,9 @@ const CardEspacio = ({ espacios }) => {
           </div>
 
           {/* Nombre */}
-          <p className="text-blue-600 font-medium text-xl">{espacio.nombre}</p>
+          <p className="text-blue-600 font-medium text-xl">{espacio.name}</p>
           {/* Área (subtítulo) */}
-          <p className="text-gray-500 text-sm">{espacio.area}</p>
+          <p className="text-gray-500 text-sm">{espacio.building.name}</p>
           {/* Categoría */}
             <div className="w-full flex flex-col items-center mt-5 gap-3">
             <Row gutter={[8, 8]} justify="center">

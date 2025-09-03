@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import supabaseClient from "../utils/supabase";
-import { Table, Card, Select, Row, Col, Spin } from "antd";
+import { Table, Card, Select, Row, Col, Spin, Empty } from "antd";
 
 function Cases() {
   const email = Cookies.get("user_email");
@@ -40,7 +40,7 @@ function Cases() {
     const { data } = await supabaseClient
       .from("users")
       .select("id_basement")
-      .eq("email", email)
+      .eq("uuid", email)
       .single();
     if (data) setSede(data.id_basement);
   };
@@ -79,6 +79,17 @@ function Cases() {
         </a>
       ),
     },
+    {
+      title: "Acciones",
+      dataIndex: "actions",
+      key: "actions",
+      render: (record) =>(
+        <div className="flex flex-col items-center gap-2 justify-between">
+          <Button>Aceptar</Button>
+          <Button>Denegar</Button>
+        </div>
+      )
+    }
   ];
 
   return (
@@ -118,21 +129,27 @@ function Cases() {
         />
       ) : (
         <Row gutter={[16, 16]}>
-          {cases.map((c) => (
-            <Col span={24} key={c.id}>
-              <Card title={c.titulo} bordered>
-                <p>
-                  <strong>Espacio:</strong> {c.espacio}
-                </p>
-                <p>
-                  <strong>URL:</strong>{" "}
-                  <a href={c.url} target="_blank" rel="noreferrer">
-                    {c.url}
-                  </a>
-                </p>
-              </Card>
+          {cases.length === 0 ? (
+            <Col span={24}>
+              <Empty description="No hay casos disponibles" />
             </Col>
-          ))}
+          ) : (
+            cases.map((c) => (
+              <Col span={24} key={c.id}>
+                <Card title={c.titulo} bordered>
+                  <p>
+                    <strong>Espacio:</strong> {c.espacio}
+                  </p>
+                  <p>
+                    <strong>URL:</strong>{" "}
+                    <a href={c.url} target="_blank" rel="noreferrer">
+                      {c.url}
+                    </a>
+                  </p>
+                </Card>
+              </Col>
+            ))
+          )}
         </Row>
       )}
     </div>

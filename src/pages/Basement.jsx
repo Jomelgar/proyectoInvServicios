@@ -72,10 +72,10 @@ function Admin() {
   };
 
   const createLugar = async (values) => {
-    await supabaseClient
+    const {error} = await supabaseClient
       .from("place")
-      .insert([{ name: values.name, id_building: values.building, is_classroom: values.is_classroom }]);
-    fetchLugares();
+      .insert([{ name: values.name, id_building: values.building, is_classroom: values?.is_classroom || false }]);
+      fetchLugares();
     setLugarModalOpen(false);
   };
 

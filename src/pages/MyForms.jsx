@@ -1,11 +1,17 @@
 import { useState, useEffect } from "react";
-import { Table, Card, Button, Alert } from "antd";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import { Table, Card, Button, Alert, Modal, Typography } from "antd";
+import { useNavigate } from "react-router-dom";
+import { PlusCircleOutlined, EyeOutlined } from "@ant-design/icons";
 import supabaseClient from "../utils/supabase";
 
+const { Title, Text } = Typography;
+
 function MyForms() {
+  const navigate= useNavigate();
   const [isMobile, setIsMobile] = useState(false);
   const [data, setData] = useState([]);
+  const [selectedCase, setSelectedCase] = useState(null); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchData = async () => {
     // Ejemplo para traer datos de Supabase
@@ -35,18 +41,19 @@ function MyForms() {
       key: "phase",
     },
     {
-      title: "URL del Caso",
-      dataIndex: "url",
-      key: "url",
-      render: (text) => (
-        <a
-          href={text}
-          className="text-blue-600 hover:text-blue-800 underline"
-          target="_blank"
-          rel="noreferrer"
+      title: "Ver Caso",
+      key: "ver",
+      render: (_, record) => (
+        <Button
+          icon={<EyeOutlined />}
+          type="primary"
+          onClick={() => {
+            setSelectedCase(record);
+            setIsModalOpen(true);
+          }}
         >
-          {text}
-        </a>
+          Ver Caso
+        </Button>
       ),
     },
   ];
@@ -76,6 +83,7 @@ function MyForms() {
         <Button
           icon={<PlusCircleOutlined />}
           className="font-[Poppins] m-2 h-full bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 transition-transform rounded-xl shadow-md text-xl md:text-lg"
+          onClick={() => navigate('/lugares')}
         >
           Solicitar
         </Button>
@@ -97,9 +105,7 @@ function MyForms() {
               <Card
                 key={item.key}
                 title={
-                  <span className="text-blue-700 font-semibold">
-                    {item.nombre}
-                  </span>
+                  <span className="text-blue-700 font-semibold">{item.nombre}</span>
                 }
                 bordered={false}
                 className="shadow-md border border-blue-200 rounded-xl"
@@ -114,17 +120,17 @@ function MyForms() {
                 <p>
                   <b>Estado:</b> {item.phase}
                 </p>
-                <p>
-                  <b>URL: </b>
-                  <a
-                    href={item.url}
-                    className="text-blue-600 hover:text-blue-800 underline"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {item.url}
-                  </a>
-                </p>
+                <Button
+                  type="primary"
+                  icon={<EyeOutlined />}
+                  onClick={() => {
+                    setSelectedCase(item);
+                    setIsModalOpen(true);
+                  }}
+                  className="mt-2"
+                >
+                  Ver Caso
+                </Button>
               </Card>
             ))
           )}
@@ -139,6 +145,40 @@ function MyForms() {
           locale={{ emptyText: "No hay casos disponibles" }}
         />
       )}
+
+      {/* Modal de caso */}
+      <Modal
+        open={isModalOpen}
+        title={selectedCase?.nombre}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+        className="font-[Poppins]"
+      >
+        {selectedCase && (
+          <div className="space-y-2">
+            <p>
+              <b>Fecha:</b> {selectedCase.fecha}
+            </p>
+            <p>
+              <b>Descripción:</b> {selectedCase.description}
+            </p>
+            <p>
+              <b>Estado:</b> {selectedCase.phase}
+            </p>
+            <p>
+              <b>URL:</b>{" "}
+              <a
+                href={selectedCase.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                {selectedCase.url}
+              </a>
+            </p>
+          </div>
+        )}
+      </Modal>
     </>
   );
 }

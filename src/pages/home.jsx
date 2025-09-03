@@ -21,7 +21,7 @@ function Home() {
       {/* Contenido */}
       <Layout>
         <Header collapsed={collapsed} setCollapsed={setCollapsed} isMobile={isMobile} setDrawerVisible={setDrawerVisible}/>
-        <Content style={{ margin: "16px", background: "#fff", padding: "16px" }}>
+        <Content className="min-h-screen" style={{ margin: "16px", background: "#fff", padding: "16px" ,height: 'auto'}}>
           <Outlet />
         </Content>
       </Layout>

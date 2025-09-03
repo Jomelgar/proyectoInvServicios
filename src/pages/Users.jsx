@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Space, Card, Pagination } from "antd";
+import { Table, Input, Button, Space, Card, Pagination, Empty,Row,Col} from "antd";
 import Cookies from "js-cookie";
 import supabase from "../utils/supabase"; 
 import EditUserModal from "../modals/EditUserModal";
 import DeleteUserModal from "../modals/DeleteUserModal";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -55,7 +56,7 @@ function Users() {
     if (error) {
       console.error("Error fetching users:", error.message);
     } else {
-      setUsers(data.filter(u => u.email !== Cookies.get("user_email")));
+      setUsers(data.filter(u => u.uuid !== Cookies.get("user_email")));
     }
     setLoading(false);
   };
@@ -83,8 +84,8 @@ function Users() {
           <p className="font-semibold text-sm">{'Es un usuario creador, no tienes permisos'}</p>
         ) : (
           <Space direction="horizontal" size="small">
-            <Button type="link" onClick={() => handleEdit(record.id)}>Editar</Button>
-            <Button type="link" danger onClick={() => handleDelete(record.id)}>Eliminar</Button>
+            <Button icon={<EditOutlined/>} className='bg-blue-500 text-white  hover:!text-white hover:!bg-blue-300' type="default" onClick={() => handleEdit(record.id)}>Editar</Button>
+            <Button icon={<DeleteOutlined/>} className='!bg-red-500 text-white  hover:!text-white hover:!bg-red-300' type="default" danger onClick={() => handleDelete(record.id)}>Eliminar</Button>
           </Space>
         ),
     },
@@ -122,20 +123,22 @@ function Users() {
       ) : (
         <>
           <div className="flex flex-col gap-4">
-            {paginatedUsers.map(user => (
-              <Card key={user.id} className="rounded-lg shadow-md">
-                <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>Rol:</strong> {user.role}</p>
-                {(currentRole === "CREADOR" || record.role !== "CREADOR") ? (
-                  <Space>
-                    <Button type="link" onClick={() => handleEdit(user.id)}>Editar</Button>
-                    <Button type="link" danger onClick={() => handleDelete(user.id)}>Eliminar</Button>
-                  </Space>
-                ) : (
-                  <p className="text-sm font-semibold">Usuario creador, no tienes permisos</p>
-                )}
-              </Card>
-            ))}
+            <Row gutter={[16, 16]}>
+              {users.length === 0 ? (
+                <Col span={24}>
+                  <Empty/>
+                  <p style={{ textAlign: "center", color: "#999" }}>No hay usuarios registrados</p>
+                </Col>
+              ) : (
+                users.map((u) => (
+                  <Col span={24} key={u.id}>
+                    <Card title={u.nombre} bordered>
+                      <p><strong>Email:</strong> {u.email}</p>
+                    </Card>
+                  </Col>
+                ))
+              )}
+            </Row>
           </div>
           <div className="flex justify-center mt-4">
             <Pagination

@@ -3,7 +3,7 @@ import {Modal,Form,Input,Select,Button,Checkbox} from "antd";
 import supababaseClient from "../utils/supabase";
 
 function AddPlace({isLugarModalOpen, setLugarModalOpen,createLugar,sedes}){
-    const [form] = Form.useForm();
+  const [form] = Form.useForm();
   const [selectedEdificioCreate, setSelectedEdificioCreate] = useState(null);
   const [selectedSedeCreate, setSelectedSedeCreate] = useState(null);
   const [edificios,setEdificios] = useState([]);

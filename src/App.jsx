@@ -17,6 +17,8 @@ import Admin from "./pages/Basement";
 import Calendario from "./pages/Calendar";
 import supabaseClient from "./utils/supabase";
 import Users from "./pages/Users";
+import Categorias from "./pages/Categories";
+import Lugares from "./pages/Places";
 
 // 🔐 Ruta protegida
 function ProtectedRoute({ allowedRoles, children }) {
@@ -103,6 +105,7 @@ function App() {
         {/* HOME + DASHBOARD */}
         <Route path="/" element={userEmail ? <Home /> : <Navigate to="/login" />}>
           <Route index element={<Dashboard />} />
+          <Route path='lugares' element={<Lugares/>}/>
           <Route path="perfil" element={<Perfil />} />
           <Route path="calendario" element={<Calendario />} />
           <Route path="formularios" element={<MisForms />} />
@@ -127,7 +130,7 @@ function App() {
           >
             <Route path="sedes" element={<Admin />} />
             <Route path="usuarios" element={<Users />} />
-            <Route path="categorias" element={<Admin />} />
+            <Route path="categorias" element={<Categorias />} />
           </Route>
         </Route>
       </Routes>
