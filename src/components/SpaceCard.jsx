@@ -3,7 +3,7 @@ import React from "react";
 import { Tag,Row,Col,Button } from "antd";
 import { EnvironmentOutlined } from "@ant-design/icons";
 
-const CardEspacio = ({ espacios }) => {
+const CardEspacio = ({ espacios,setId, setOpen}) => {
   if (!espacios || espacios.length === 0) {
     return <p className="text-gray-500">No hay espacios disponibles.</p>;
   }
@@ -46,7 +46,7 @@ const CardEspacio = ({ espacios }) => {
                 type="primary"
                 className="mt-3 bg-blue-600 hover:bg-blue-700 border-none"
                 block
-                onClick={()=> {Navigate('/reservar')}}
+                onClick={()=> {setId(espacio.id); setOpen(true);}}
             >
                 Solicitar
             </Button>

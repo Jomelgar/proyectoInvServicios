@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import supabase from "../utils/supabase";
 import Cookies from "js-cookie";
 import CardEspacio from "../components/SpaceCard";
+import AddCase from "../modals/AddCase";
 
 const { Title } = Typography;
 
@@ -12,7 +13,9 @@ function Places() {
   const navigate = useNavigate();
 
   const [places, setPlaces] = useState([]);
+  const [place, setPlace] = useState();
   const [loading, setLoading] = useState(false);
+  const [openCase,setOpenCase] = useState(false);
 
   // Paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,7 +97,8 @@ function Places() {
         <>
           <CardEspacio
             espacios={paginatedPlaces}
-            onReservar={(id) => navigate(`/reservar/${id}`)}
+            setId={setPlace}
+            setOpen={setOpenCase}
           />
 
           {places.length > pageSize && (
@@ -110,6 +114,8 @@ function Places() {
           )}
         </>
       )}
+
+      <AddCase isOpen={openCase} setOpen={setOpenCase} placeId={place}/>
     </div>
   );
 }
