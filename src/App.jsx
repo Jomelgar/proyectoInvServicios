@@ -73,7 +73,7 @@ function Dashboard() {
   }, []);
 
   if (loading) return <p>Cargando dashboard...</p>;
-  return role === "USUARIO" ? <DashboardNormal /> : <DashboardAdmin />;
+  return role === 'USUARIO' ? <DashboardNormal /> : <DashboardAdmin />;
 }
 
 function App() {

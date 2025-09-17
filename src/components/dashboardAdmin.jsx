@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Table } from "antd";
 import {
   ClockCircleOutlined,
@@ -6,51 +6,86 @@ import {
   CloseCircleOutlined,
   BarsOutlined,
 } from "@ant-design/icons";
+import supabase from "../utils/supabase";
 
 const Dashboard = ({ data }) => {
+  const [pendientes,setPendientes] = useState(0);
+  const [aprobadas,setAprobadas] = useState(0);
+  const [rechazadas,setRechazadas] = useState(0);
+  const [total,setTotal] = useState(0);
+  const [events,setEvents] = useState([]);
+
+  const fetchStatistics = async()=>{
+    const {count: pendientes} = await supabase.from('case').select("*", { count: "exact", head: true }).eq('phase', "En Proceso");
+    setPendientes(pendientes || 0);
+    const {count: rechazadas} = await supabase.from('case').select("*", { count: "exact", head: true }).eq('phase', "Rechazada");
+    setRechazadas(rechazadas || 0);
+    const {count: aprobadas} = await supabase.from('case').select("*", { count: "exact", head: true }).eq('phase', "Aceptada");
+    setAprobadas(aprobadas || 0);
+    const {count: total} = await supabase.from('case').select("*", { count: "exact", head: true });
+    setTotal(total || 0);
+  };
+
+  const fetchCases= async()=>{
+    const { data, error } = await supabase
+    .from("case")
+    .select(`
+      title,
+      calendar (
+        date
+      )
+    `)
+    .order("date", { foreignTable: "calendar", ascending: false }) // 👈 clave
+    .limit(3);
+    setEvents(data);
+  }
+
+  useEffect(()=>{
+    fetchStatistics();
+    fetchCases();
+  }
+  ,[]);
+
   const cards = [
     {
       title: "Solicitudes Pendientes",
       value: data?.pendientes,
       color: "bg-blue-400",
       icon: <ClockCircleOutlined className="text-3xl opacity-80" />,
+      value: <p className="text-center">{pendientes}</p>,
     },
     {
       title: "Solicitudes Aprobadas",
       value: data?.aprobadas,
       color: "bg-blue-700",
       icon: <CheckCircleOutlined className="text-3xl opacity-80" />,
+      value: <p className="text-center">{aprobadas}</p>,
     },
     {
       title: "Solicitudes Rechazadas",
       value: data?.rechazadas,
       color: "bg-blue-500",
       icon: <CloseCircleOutlined className="text-3xl opacity-80" />,
+      value: <p className="text-center">{rechazadas}</p>,
     },
     {
       title: "Total de Solicitudes",
       value: data?.total,
       color: "bg-blue-900",
       icon: <BarsOutlined className="text-3xl opacity-80" />,
+      value: <p className="text-center">{total}</p>,
     },
   ];
-
-  const eventos = [
-    { key: 1, nombre: "Reunión de coordinación", fecha: "2025-08-20" },
-    { key: 2, nombre: "Entrega de Becas", fecha: "2025-08-25" },
-    { key: 3, nombre: "Mecatón", fecha: "2025-09-05" },
-  ];
-
   const columns = [
     {
       title: "Evento",
-      dataIndex: "nombre",
-      key: "nombre",
+      dataIndex: "title",
+      key: "title",
     },
     {
       title: "Fecha",
-      dataIndex: "fecha",
-      key: "fecha",
+      key: "date",
+      render: (_,record) => record.calendar[0].date,
       responsive: ["xs", "sm", "md", "lg"],
     },
   ];
@@ -82,7 +117,7 @@ const Dashboard = ({ data }) => {
         <h2 className="text-xl font-bold mb-4 text-blue-800">Eventos por venir</h2>
         <Table
           columns={columns}
-          dataSource={eventos}
+          dataSource={events}
           pagination={false}
           scroll={{ x: true }} // Scroll horizontal en móvil
         />

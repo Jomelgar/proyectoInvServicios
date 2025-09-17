@@ -1,27 +1,30 @@
-import React from "react";
-import { Table, Tag } from "antd";
+import {useState,useEffect} from "react";
+import { PlusCircleOutlined } from "@ant-design/icons";
+import { Button, Table, Tag } from "antd";
 import {
   ClockCircleOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
 } from "@ant-design/icons";
 import CardEspacio from "./SpaceCard";
-
-//TODO: solo seria de limite 3
-const espaciosEjemplo = [
-  { categoria: ["Deportes","Cumpleaños"], nombre: "Cancha de Fútbol", imagen: "", area: "Zona Norte" },
-  { categoria: ["Cultura"], nombre: "Biblioteca Central", imagen: "", area: "Zona Centro" },
-  { categoria: ["Recreación"], nombre: "Parque Infantil", imagen: "", area: "Zona Sur" },
-];
+import { useNavigate } from "react-router-dom";
 
 
 
 const UserDashboard = ({ userCases }) => {
-  // Calculamos conteo de cada estado
-  const pendientes = userCases?.filter(c => c.estado === "Pendiente").length;
-  const aprobadas = userCases?.filter(c => c.estado === "Aprobada").length;
-  const rechazadas = userCases?.filter(c => c.estado === "Rechazada").length;
+  const navigate = useNavigate();
+  const [pendientes,setPendientes] = useState(0);
+  const [aprobadas,setAprobadas] = useState(0);
+  const [rechazadas,setRechazadas] = useState(0);
 
+  const fetchStatistics = async()=>{
+    const {count: pendientes} = await supabase.from('case').select("*", { count: "exact", head: true }).eq('phase', "En Proceso");
+    setPendientes(pendientes || 0);
+    const {count: rechazadas} = await supabase.from('case').select("*", { count: "exact", head: true }).eq('phase', "Rechazada");
+    setRechazadas(rechazadas || 0);
+    const {count: aprobadas} = await supabase.from('case').select("*", { count: "exact", head: true }).eq('phase', "Aceptada");
+    setAprobadas(aprobadas || 0);
+  };
   const cards = [
     {
       title: "Pendientes",
@@ -69,7 +72,7 @@ const UserDashboard = ({ userCases }) => {
   ];
 
   return (
-    <div className="p-6 min-h-screen">
+    <div className="p-6 min-h-screen items-center flex-col">
       <h1 className="text-4xl font-bold mb-6 text-blue-900 border-b">Mis Solicitudes</h1>
 
       {/* Cards con conteo */}
@@ -87,9 +90,20 @@ const UserDashboard = ({ userCases }) => {
           </div>
         ))}
       </div>
-      <div className="mt-5">
-        <h1 className="text-3xl text-center font-bold mb-6 text-blue-900">Espacios más Reservados</h1>
-        <CardEspacio espacios={espaciosEjemplo} />
+      <div className="flex flex-col items-center">
+        {/* Contenedor del botón grande */}
+        <div className="w-full max-w-2xl bg-white p-10 rounded-3xl shadow-2xl flex flex-col items-center mt-12">
+          <p className=" font-[Poppins] text-center mb-6 text-gray-700 font-medium text-xl md:text-2xl">
+            ¡Reserva tus espacios favoritos de manera rápida y sencilla!
+          </p>
+          <Button
+            icon={<PlusCircleOutlined />}
+            className="flex items-center font-[Poppins] justify-center font-bold px-12 py-6 text-white bg-blue-500 hover:bg-blue-600 rounded-2xl shadow-2xl text-3xl md:text-4xl transform transition-transform hover:scale-110"
+            onClick={() => navigate("/lugares")}
+          >
+            Solicitar Espacios
+          </Button>
+        </div>
       </div>
     </div>
   );

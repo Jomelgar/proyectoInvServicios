@@ -72,7 +72,7 @@ function Profile() {
 
   const handleSave = async (values) => {
     setLoading(true);
-    const {data} = await SupabaseClient.from("users")
+    const {data,error} = await SupabaseClient.from("users")
       .update({
         first_name: values.firstName,
         second_name: values.secondName,
@@ -83,10 +83,8 @@ function Profile() {
         id_basement: values.basement,
       })
       .eq("email", values.email).select().single();
-    const {error} = await SupabaseClient.from('user_roles').update({role: data.role}).eq('uuid',data.uuid);
-    
     if (!error) {
-      window.location.reload();
+     window.location.reload();
     }
     setIsEditing(false);
     setLoading(false);
