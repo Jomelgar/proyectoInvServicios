@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Layout } from "antd";
 import { Outlet } from "react-router-dom"; // <- Importa Outlet
 import Sidebar from "../components/sidebar";
-import Header from "../components/Header";
+import Header from "../components/header";
 
 const { Content } = Layout;
 
