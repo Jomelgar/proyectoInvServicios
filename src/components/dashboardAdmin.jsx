@@ -49,7 +49,6 @@ const Dashboard = ({ data }) => {
   const cards = [
     {
       title: "Solicitudes Pendientes",
-      value: data?.pendientes,
       color: "bg-blue-400",
       icon: <ClockCircleOutlined className="text-3xl opacity-80" />,
       value: <p className="text-center">{pendientes}</p>,
