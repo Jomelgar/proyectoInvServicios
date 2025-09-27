@@ -55,21 +55,18 @@ const Dashboard = ({ data }) => {
     },
     {
       title: "Solicitudes Aprobadas",
-      value: data?.aprobadas,
       color: "bg-blue-700",
       icon: <CheckCircleOutlined className="text-3xl opacity-80" />,
       value: <p className="text-center">{aprobadas}</p>,
     },
     {
       title: "Solicitudes Rechazadas",
-      value: data?.rechazadas,
       color: "bg-blue-500",
       icon: <CloseCircleOutlined className="text-3xl opacity-80" />,
       value: <p className="text-center">{rechazadas}</p>,
     },
     {
       title: "Total de Solicitudes",
-      value: data?.total,
       color: "bg-blue-900",
       icon: <BarsOutlined className="text-3xl opacity-80" />,
       value: <p className="text-center">{total}</p>,
