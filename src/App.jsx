@@ -10,6 +10,7 @@ import CreateAccount from "./pages/createaccount";
 import Home from "./pages/home";
 import DashboardAdmin from "./components/dashboardAdmin";
 import DashboardNormal from "./components/dashboardNormal";
+import Error from "./pages/Error"
 import Perfil from "./pages/Profile";
 import MisForms from "./pages/MyForms";
 import Casos from "./pages/Cases";
@@ -133,6 +134,7 @@ function App() {
             <Route path="categorias" element={<Categorias />} />
           </Route>
         </Route>
+        <Route path="*" element={<Error/>}/>
       </Routes>
     </BrowserRouter>
   );
