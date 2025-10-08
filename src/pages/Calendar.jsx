@@ -175,7 +175,7 @@ function MyCalendar() {
             dataSource={dayEvents}
             renderItem={(item) => (
               <List.Item className="!border-0 !p-0">
-                <div className="w-full flex items-center justify-between bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 hover:shadow-md transition-shadow duration-200">
+                <div className="w-full flex items-center bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 hover:shadow-md transition-shadow duration-200">
                   <div className="flex flex-col text-left">
                     <span className="font-[Poppins] text-sm text-gray-500 font-semibold">
                       Horario
@@ -184,8 +184,11 @@ function MyCalendar() {
                       {item.time}
                     </span>
                   </div>
-                  <div className="flex-1 ml-6">
-                    <span className="text-base font-[Poppins] font-semibold text-gray-800">
+                  <div className="flex flex-col ml-6">
+                    <span className="font-[Poppins] text-sm text-gray-500 font-semibold">
+                      Lugar
+                    </span>
+                    <span className="text-xl font-[Poppins] font-semibold text-gray-800">
                       {item.title}
                     </span>
                   </div>

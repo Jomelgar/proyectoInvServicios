@@ -114,7 +114,7 @@ function PlaceCategory({ place, setPlace, edit }) {
             <Col span={12}>
               <Text strong>Nombre del Lugar:</Text>
               <Input
-                className="mt-1 font-[Poppins]"
+                className="mt-1 font-[Poppins] !text-gray-800"
                 disabled
                 value={place?.name}
                 placeholder="Sin nombre"
@@ -123,7 +123,7 @@ function PlaceCategory({ place, setPlace, edit }) {
             <Col span={12}>
               <Text strong>Edificio:</Text>
               <Input
-                className="mt-1 font-[Poppins]"
+                className="mt-1 font-[Poppins] !text-gray-800"
                 disabled
                 value={place?.building?.name}
                 placeholder="Sin edificio"
@@ -133,7 +133,8 @@ function PlaceCategory({ place, setPlace, edit }) {
         </Card>
         {/* Categorías */}
         <Card bordered={false} className="shadow-sm rounded-xl mb-4 font-[Poppins]">
-          <div className="mb-4">
+          {edit && (
+            <div className="mb-4">
             <Title level={5}>Añadir Categoría</Title>
             <Row gutter={8}>
               <Col flex="auto">
@@ -165,6 +166,7 @@ function PlaceCategory({ place, setPlace, edit }) {
               </Col>
             </Row>
           </div>
+          )}
           <Title level={5}>Categorías que tiene el lugar</Title>
           <List
             bordered
